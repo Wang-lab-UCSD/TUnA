@@ -16,32 +16,32 @@ NOTE: The torch packages in environment.yml may need to be edited depending on w
 ## Usage
 ### Data processing
 #### Cross-species Dataset
-
-#### Bernett Dataset
-First we will construct the train/val/test datasets using the raw Bernett dataset. Once you are in the TUnA directory
 ```console
-$ python3 create_datasets.py 
+$ python3 process_xspecies.py 
 ```
-Next, we create ESM-2 embeddings
+#### Bernett Dataset
+First we will construct the train/val/test datasets and embed using ESM-2 for the raw Bernett dataset. Once you are in the TUnA directory
 ```console
-$ python3 embed.py 
+$ python3 process_bernett.py 
 ```
 NOTE: We separate proteins into less than 1500 and greater than 1500. We use the GPU for sequences less than 1500 but use the CPU for sequences greater than 1500. Some sequences greater than 5000 require up to 300Gb of memory for embedding. We provide a pt file that contains these embeddings for download. Please use combine_dictionary.py to combine the two protein dictionaries into one. 
 ___
 ### Training, evaluation, and prediction
 
-#### To train from scratch:
+#### To train from scratch, head to results/ and choose the dataset/model you wish to train. Then, run:
 ```console
 $ python3 main.py 
 ```
-Hyperparameters and other options can be controlled using the config.yaml file. Please make sure the directories to the train/val/test dictionary and interaction files are correct. 
+Hyperparameters and other options can be controlled using the config.yaml file. Please make sure the directories to the train/val/test dictionary and interaction files are correct. Every epoch, the performance on the validation set will be logged in output/results.txt
+
+
 After training, to evaluate the model:
 ```console
 $ python3 evaluate.py 
 ```
 #### Using pre-trained models:
 ```console
-$ cd TUnA/bernett # navigate to the model you wish to use. The pretrained model is already located in output/model
+$ cd results/bernett/TUnA # navigate to the model you wish to use. The pretrained model is already located in output/model
 $ python3 evaluate.py 
 ```
 ### Making predictions for any PPIs of interest
