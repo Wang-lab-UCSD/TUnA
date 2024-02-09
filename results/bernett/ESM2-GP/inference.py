@@ -1,6 +1,6 @@
 from model import (ProteinInteractionNet, Tester)
 from uncertaintyAwareDeepLearn import VanillaRFFLayer
-from utils import (
+from src.models.esmgp.utils import (
     load_configuration,
     set_random_seed,
     get_computation_device,
@@ -30,8 +30,7 @@ def main():
     # Initialize the testing modules
     tester = Tester(model)
 
-    # --- Training and Validation ---
-    # Perform training and validation
+    # --- Evaluate trained model ---
     evaluate(config, tester)
 
 # Execute the main function when the script is run

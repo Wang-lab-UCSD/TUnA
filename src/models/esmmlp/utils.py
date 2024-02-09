@@ -1,6 +1,6 @@
 import torch
 import random
-from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, auc, precision_recall_curve, precision_score, recall_score, confusion_matrix
+from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, auc, precision_recall_curve, f1_score, precision_score, matthews_corrcoef
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, Dataset
 import matplotlib.pyplot as plt
@@ -116,31 +116,43 @@ def train_and_validate_model(config, trainer, tester, scheduler, model, device):
         scheduler.step()
         plot(config['directories']['metrics_output'])
 
-def load_and_predict(config, tester, model, device):
+def evaluate(config, tester):
     test_dictionary = load_dictionary(config['directories']['test_dictionary'])
     test_interactions = config['directories']['test_interactions']
+
     subset = config['training']['subset']
     if subset < 0:
         subset = None
 
-    T, Y, S, total_loss_test, total_test_size = test_epoch(test_dictionary, test_interactions, subset, tester, config)
-    AUC_dev, PRC_dev, accuracy, sensitivity, specificity, precision, f1, mcc = calculate_metrics(T,Y,S)
-    print(total_loss_test/total_test_size, AUC_dev, PRC_dev, accuracy, sensitivity, specificity, precision, f1, mcc)
-    # Convert to numpy arrays for easier manipulation
-    T = np.array(T)  # True labels
-    Y = np.array(Y)  # Predictions
-    S = np.array(S)  # Prediction scores/probabilities
+    T, Y, S, total_loss_test, total_test_size = test_epoch(test_dictionary, test_interactions, subset, tester, config, last_epoch=True)
+    AUC_dev, PRC_dev, accuracy, sensitivity, specificity, precision, f1, mcc = calculate_metrics(T, Y, S)
+    print(total_loss_test / total_test_size, AUC_dev, PRC_dev, accuracy, sensitivity, specificity, precision, f1, mcc)
+
+    # Calculate Expected Calibration Error
     ece = cal.get_ece(S, T)
     print("Expected Calibration Error (ECE):", ece)
-    uncertainty = (1-S)*(S)/0.25
+    
+    # Calculate uncertainty
+    uncertainty = (1 - np.array(S)) * (np.array(S)) / 0.25
+
+    # Add S and uncertainty columns to test_interactions DataFrame
+    test_interactions = pd.read_csv(test_interactions, sep='\t', header=None)
+    column_names = ['Protein A', 'Protein B', 'T']
+    test_interactions.columns = column_names[:len(test_interactions.columns)]
+    test_interactions['S'] = S
+    test_interactions['uncertainty'] = uncertainty
+
+    # Saving to TSV
+    test_interactions.to_csv('evaluation_results.tsv', sep='\t', index=False)
 
     for cutoff in [0.2, 0.4, 0.6, 0.8]:
-            filtered_indices = uncertainty < cutoff
-            T_filtered = T[filtered_indices]
-            Y_filtered = Y[filtered_indices]
-            true_positives = sum((T_filtered == 1) & (Y_filtered == 1))
-            precision_filtered = precision_score(T_filtered, Y_filtered)
-            print(f"Uncertainty Cutoff {cutoff}: Precision - {precision_filtered}, True Positives - {true_positives}")
+        filtered_indices = uncertainty < cutoff
+        T_filtered = np.array(T)[filtered_indices]
+        Y_filtered = np.array(Y)[filtered_indices]
+        true_positives = sum((T_filtered == 1) & (Y_filtered == 1))
+        precision_filtered = precision_score(T_filtered, Y_filtered, zero_division=0)
+        print(f"Uncertainty Cutoff {cutoff}: Precision - {precision_filtered}, True Positives - {true_positives}")
+
 # ------------------- Data Loading -------------------
 
 class ProteinInteractionDataset(Dataset):

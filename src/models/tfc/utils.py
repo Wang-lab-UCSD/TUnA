@@ -1,10 +1,8 @@
 import torch
 import random
-from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, auc, precision_recall_curve
-import matplotlib.pyplot as plt
+from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, auc, precision_recall_curve, f1_score, precision_score, matthews_corrcoef
 from torch.utils.data import DataLoader, Dataset
 import matplotlib.pyplot as plt
-from sklearn.metrics import precision_score, recall_score, confusion_matrix
 import calibration as cal
 import logging
 import yaml

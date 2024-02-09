@@ -1,7 +1,6 @@
 import torch
 import random
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, auc, precision_recall_curve, f1_score, precision_score, matthews_corrcoef
-import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, Dataset
 import matplotlib.pyplot as plt
 import calibration as cal
@@ -45,13 +44,13 @@ def get_computation_device(cuda_device=None):
 def initialize_scheduler(trainer, optimizer_config):
     return torch.optim.lr_scheduler.StepLR(trainer.optimizer, optimizer_config['step_size'], optimizer_config['gamma'])
 
-
 # ------------------- Model Training and Testing -------------------
 # Train the model for one epoch
 def train_epoch(dictionary, action_file, subset, trainer, config, device, last_epoch):
     total_loss = 0
     total_samples = 0
     batch_size = config['training']['batch_size']
+    max_seq_length = config['model']['max_sequence_length']
     protein_dim = config['model']['protein_embedding_dim']    
     
     dataset = ProteinInteractionDataset(dictionary, action_file, subset)
@@ -60,7 +59,7 @@ def train_epoch(dictionary, action_file, subset, trainer, config, device, last_e
     
     for proteinA, proteinB, labels in train_loader:
         dataset_batch = list(zip(proteinA, proteinB, labels))
-        batch_loss = trainer.train(dataset_batch, protein_dim, device, last_epoch)
+        batch_loss = trainer.train(dataset_batch, max_seq_length, protein_dim, device, last_epoch)
         
         total_loss += batch_loss
 
@@ -72,6 +71,7 @@ def test_epoch(dictionary, action_file, subset, tester, config, last_epoch):
     T, Y, S = [], [], []
     total_loss = 0
     total_samples = 0
+    max_seq_length = config['model']['max_sequence_length']
     protein_dim = config['model']['protein_embedding_dim'] 
     dataset = ProteinInteractionDataset(dictionary, action_file, subset)
     total_samples += len(dataset)
@@ -79,7 +79,7 @@ def test_epoch(dictionary, action_file, subset, tester, config, last_epoch):
     
     for proteinA, proteinB, labels in dev_loader:
         dataset_batch = list(zip(proteinA, proteinB, labels))
-        batch_loss, t, y, s = tester.test(dataset_batch, protein_dim, last_epoch)
+        batch_loss, t, y, s = tester.test(dataset_batch, max_seq_length, protein_dim, last_epoch)
         T.extend(t)
         Y.extend(y)
         S.extend(s)
@@ -130,7 +130,6 @@ def train_and_validate_model(config, trainer, tester, scheduler, model, device):
             plot(config['directories']['metrics_output'])
             save_model(model, "output/model")
 
-
 def evaluate(config, tester):
     test_dictionary = load_dictionary(config['directories']['test_dictionary'])
     test_interactions = config['directories']['test_interactions']
@@ -167,7 +166,6 @@ def evaluate(config, tester):
         true_positives = sum((T_filtered == 1) & (Y_filtered == 1))
         precision_filtered = precision_score(T_filtered, Y_filtered, zero_division=0)
         print(f"Uncertainty Cutoff {cutoff}: Precision - {precision_filtered}, True Positives - {true_positives}")
-
 
 # ------------------- Data Loading -------------------
 
@@ -209,10 +207,9 @@ def calculate_metrics(T, Y, S):
     tn, fp, fn, tp = confusion_matrix(T, Y).ravel()
     sensitivity = tp / (tp + fn)
     specificity = tn / (tn + fp)
-    precision = precision_score(T, Y)
-    f1 = f1_score(T, Y)
-    mcc = matthews_corrcoef(T,Y)
-    
+    precision = tp / (tp + fp)
+    f1 = 2 * (precision * sensitivity) / (precision + sensitivity)
+    mcc = (tp * tn - fp * fn) / ((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)) ** 0.5
     return AUC_dev, PRC_dev, accuracy, sensitivity, specificity, precision, f1, mcc
 
 # Log and save metrics
@@ -292,25 +289,68 @@ def plot(directory, train=True):
     plt.savefig(current_dir[:2] + '.png', dpi=300)
     plt.close()
 
-
 # ------------------- Data Manipulation -------------------
 # Prepare data for training/testing (packing, pooling, etc.)
-def pack(protAs, protBs, labels, protein_dim, device):
+def pack(protAs, protBs, labels, max_length, protein_dim, device):
+
     N = len(protAs)
-    # Initialize new tensors to store the averaged protein representations
-    protAs_avg = torch.zeros((N, protein_dim), device=device)
-    protBs_avg = torch.zeros((N, protein_dim), device=device)
+    protA_lens = [protA.shape[0] for protA in protAs]
+    protB_lens = [protB.shape[0] for protB in protBs]
 
-    # Process and average each protein A sequence
+    #batch_max_length = min(max(max(protA_lens), max(protB_lens)),max_length)
+    batch_max_length = max_length
+
+
+    protAs_new = torch.zeros((N, batch_max_length, protein_dim), device=device)
     for i, protA in enumerate(protAs):
-        protAs_avg[i] = protA.mean(dim=0)
-
-    # Process and average each protein B sequence
+        a_len = protA.shape[0]
+        if a_len <= batch_max_length:
+            protAs_new[i, :a_len, :] = protA
+        else:
+            start_pos = random.randint(0,a_len-batch_max_length)
+            protAs_new[i, :batch_max_length, :]  = protA[start_pos:start_pos+batch_max_length]
+    
+    protBs_new = torch.zeros((N, batch_max_length, protein_dim), device=device)
     for i, protB in enumerate(protBs):
-        protBs_avg[i] = protB.mean(dim=0)
+        b_len = protB.shape[0]
+        if b_len <= batch_max_length:
+            protBs_new[i, :b_len, :] = protB
+        else:
+            start_pos = random.randint(0,b_len-batch_max_length)
+            protBs_new[i, :batch_max_length, :]  = protB[start_pos:start_pos+batch_max_length]
+    # labels_new: torch.tensor [N,]
+    
+    labels_new = torch.zeros(N, dtype=torch.long, device=device)
+    for i, label in enumerate(labels):
+        # Convert the label (assuming it's a NumPy array) to a PyTorch tensor
+        labels_new[i] = label
 
-    # Convert labels to tensor
-    labels_new = torch.tensor(labels, dtype=torch.long, device=device)
+    return (protAs_new, protBs_new, labels_new, protA_lens, protB_lens, batch_max_length, batch_max_length)
 
-    return (protAs_avg, protBs_avg, labels_new)
+def test_pack(protAs, protBs, labels, max_length, protein_dim, device):
 
+    N = len(protAs)
+    protA_lens = [protA.shape[0] for protA in protAs]
+    protB_lens = [protB.shape[0] for protB in protBs]
+
+    batch_protA_max_length = max(protA_lens)
+    batch_protB_max_length = max(protB_lens)
+
+    protAs_new = torch.zeros((N, batch_protA_max_length, protein_dim), device=device)
+    for i, protA in enumerate(protAs):
+        a_len = protA.shape[0]
+        protAs_new[i, :a_len, :] = protA
+
+    protBs_new = torch.zeros((N, batch_protB_max_length, protein_dim), device=device)
+    for i, protB in enumerate(protBs):
+        b_len = protB.shape[0]
+        protBs_new[i, :b_len, :] = protB
+
+    # labels_new: torch.tensor [N,]
+    
+    labels_new = torch.zeros(N, dtype=torch.long, device=device)
+    for i, label in enumerate(labels):
+        # Convert the label (assuming it's a NumPy array) to a PyTorch tensor
+        labels_new[i] = label
+
+    return (protAs_new, protBs_new, labels_new, protA_lens, protB_lens, batch_protA_max_length, batch_protB_max_length)

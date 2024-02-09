@@ -1,6 +1,6 @@
 from model import (IntraEncoder, InterEncoder, ProteinInteractionNet, Tester)
 from uncertaintyAwareDeepLearn import VanillaRFFLayer
-from utils import (
+from src.models.tfc.utils  import (
     load_configuration,
     set_random_seed,
     get_computation_device,
@@ -12,9 +12,6 @@ def main():
     # --- Pre-Training Setup ---
     # Load configs. Use config file to change hyperparameters.
     config = load_configuration("config.yaml")
-    
-    # Set up logging to save output to a text file
-    #initialize_logging("output/results.txt")
     
     # Set random seed for reproducibility
     set_random_seed(config['other']['random_seed'])
@@ -36,8 +33,7 @@ def main():
     # Initialize the testing modules
     tester = Tester(model)
 
-    # --- Training and Validation ---
-    # Perform training and validation
+    # --- Evaluate trained model ---
     evaluate(config, tester)
 
 # Execute the main function when the script is run
