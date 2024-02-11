@@ -40,9 +40,13 @@ After training, to evaluate the model:
 $ python3 evaluate.py 
 ```
 #### Using pre-trained models:
+First, download the pretrained models you wish from: https://huggingface.co/datasets/yk0/TUnA_data/tree/main
+Then, place the model file in the results/dataset/model/output directory. For example: place the bernett-TUnA model in the results/bernett/TUnA/output
+
+Then run the inference:
 ```console
-$ cd results/bernett/TUnA # navigate to the model you wish to use. The pretrained model is already located in output/model
-$ python3 evaluate.py 
+$ cd results/bernett/TUnA # navigate to the model you wish to use. The pretrained model needs to be placed in output/
+$ python3 inference.py 
 ```
 ### Making predictions for any PPIs of interest
 First, collect the proteins you wish to predict the interactions for. 
