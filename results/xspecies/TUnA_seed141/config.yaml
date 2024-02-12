@@ -1,10 +1,10 @@
 # Model Architecture
 model:
   protein_embedding_dim: 640 # ESM2 embedding dimensions
-  hid_dim: 64
+  hid_dim: 256
   n_layers: 1 # Number of encoder and decoder layers
   n_heads: 8 # Number of attention heads
-  ff_dim: 256
+  ff_dim: 1024
   dropout: 0.2
   max_sequence_length: 512  # Maximum sequence length for input data
   activation_function: "swish" # Options ["relu", "gelu", "swish", "elu", "leaky_relu", "mish"]
@@ -32,13 +32,13 @@ directories:
   train_interactions: "../../../data/processed/xspecies/human_train_interaction.tsv"
   validation_dictionary: "../../../data/embedded/xspecies/human_test_dictionary/protein_dictionary.pt"
   validation_interactions: "../../../data/processed/xspecies/human_test_interaction.tsv"
-  test_dictionary: "../../../data/embedded/xspecies/mouse_test_dictionary/protein_dictionary.pt" #[mouse, fly, worm, yeast, ecoli]
-  test_interactions: "../../../data/processed/xspecies/mouse_test_interaction.tsv" #[mouse, fly, worm, yeast, ecoli]
+  test_dictionary: "../../../data/embedded/xspecies/" #[mouse, fly, worm, yeast, ecoli]
+  test_interactions: "../../../data/processed/xspecies/" #[mouse, fly, worm, yeast, ecoli]
   metrics_output: "output/results.txt"
   model_output: "output/model" # Where the best model will be saved.
 
 
 # Other Parameters 
 other:
-  random_seed: 47  # Chirp chirp!
-  cuda_device: 'cuda:1'
+  random_seed: 141  # Chirp chirp!
+  cuda_device: 'cuda:3'
