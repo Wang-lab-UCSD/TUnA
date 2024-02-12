@@ -1,10 +1,8 @@
 import torch
 import random
-from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, auc, precision_recall_curve, f1_score, precision_score, matthews_corrcoef
+from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, auc, precision_recall_curve, precision_score
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, Dataset
-from sklearn.calibration import CalibrationDisplay
-import matplotlib.pyplot as plt
 import calibration as cal
 import logging
 import yaml
@@ -18,7 +16,7 @@ import timeit
 # Set up logging to a specific file
 def initialize_logging(log_file):
     logging.basicConfig(filename=log_file, filemode='w', level=logging.INFO, format='%(message)s')
-    logging.info("Epoch Time              Train Loss          Test Loss           AUC                 PRC                 Accuracy            Sensitivity         Specificity         Precision           F1                  MCC")
+    logging.info("Epoch Time              Train Loss          Test Loss           AUC                 PRC                 Accuracy            Sensitivity         Specificity         Precision           F1                  MCC                 Max AUC")
 
 # Set random seed for reproducibility
 def set_random_seed(seed):
@@ -49,7 +47,7 @@ def initialize_scheduler(trainer, optimizer_config):
 
 # ------------------- Model Training and Testing -------------------
 # Train the model for one epoch
-def train_epoch(dictionary, action_file, subset, trainer, config, device, last_epoch):
+def train_epoch(dictionary, action_file, subset, trainer, config, device):
     total_loss = 0
     total_samples = 0
     batch_size = config['training']['batch_size']
@@ -61,14 +59,14 @@ def train_epoch(dictionary, action_file, subset, trainer, config, device, last_e
     
     for proteinA, proteinB, labels in train_loader:
         dataset_batch = list(zip(proteinA, proteinB, labels))
-        batch_loss = trainer.train(dataset_batch, protein_dim, device, last_epoch)
+        batch_loss = trainer.train(dataset_batch, protein_dim, device)
         
         total_loss += batch_loss
 
     return total_loss, total_samples
 
 # Test the model for one epoch
-def test_epoch(dictionary, action_file, subset, tester, config, last_epoch):
+def test_epoch(dictionary, action_file, subset, tester, config):
     
     T, Y, S = [], [], []
     total_loss = 0
@@ -78,27 +76,15 @@ def test_epoch(dictionary, action_file, subset, tester, config, last_epoch):
     total_samples += len(dataset)
     dev_loader = DataLoader(dataset, batch_size=1, shuffle=False, collate_fn=list_collate)
     
-    if last_epoch: 
-        for proteinA, proteinB, labels in dev_loader:
-            dataset_batch = list(zip(proteinA, proteinB, labels))
-            batch_loss, t, y, s = tester.test(dataset_batch, protein_dim, last_epoch)
-            T.extend(t)
-            Y.extend(y)
-            S.extend(s)
-            total_loss += batch_loss
-            
-        return T, Y, S, total_loss, total_samples
-
-    else:
-        for proteinA, proteinB, labels in dev_loader:
-            dataset_batch = list(zip(proteinA, proteinB, labels))
-            batch_loss, t, y, s = tester.test(dataset_batch, protein_dim, last_epoch)
-            T.extend(t)
-            Y.extend(y)
-            S.extend(s)
-            total_loss += batch_loss
-            
-        return T, Y, S, total_loss, total_samples
+    for proteinA, proteinB, labels in dev_loader:
+        dataset_batch = list(zip(proteinA, proteinB, labels))
+        batch_loss, t, y, s = tester.test(dataset_batch, protein_dim)
+        T.extend(t)
+        Y.extend(y)
+        S.extend(s)
+        total_loss += batch_loss
+        
+    return T, Y, S, total_loss, total_samples
 
 # Train and validate the model across multiple epochs
 def train_and_validate_model(config, trainer, tester, scheduler, model, device):
@@ -114,35 +100,20 @@ def train_and_validate_model(config, trainer, tester, scheduler, model, device):
         subset = None
 
     for epoch in range(1, config['training']['iteration'] + 1):
-        if epoch != (config['training']['iteration']):
-            total_loss_train, total_train_size = train_epoch(train_dictionary, train_interactions, subset, trainer, config, device, last_epoch=False)
-            T, Y, S, total_loss_test, total_test_size = test_epoch(test_dictionary, test_interactions, subset, tester, config, last_epoch=False)
-            
-            end = timeit.default_timer()
-            time = end - start
-
-            AUC_dev, PRC_dev, accuracy, sensitivity, specificity, precision, f1, mcc = calculate_metrics(T,Y,S)
-            
-            if AUC_dev > max_AUC_dev:
-                save_model(model, "output/model")
-                max_AUC_dev = AUC_dev
-            
-            log_and_save_metrics(epoch, time, total_loss_train, total_train_size, total_loss_test, total_test_size, AUC_dev, PRC_dev, accuracy, sensitivity, specificity, precision, f1, mcc, max_AUC_dev)
-            scheduler.step()
-            plot(config['directories']['metrics_output'])
-
+        total_loss_train, total_train_size = train_epoch(train_dictionary, train_interactions, subset, trainer, config, device)
+        T, Y, S, total_loss_test, total_test_size = test_epoch(test_dictionary, test_interactions, subset, tester, config)
         
-        if epoch == (config['training']['iteration']):
-            total_loss_train, total_train_size = train_epoch(train_dictionary, train_interactions, subset, trainer, config, device, last_epoch=True)
-            T, Y, S, total_loss_test, total_test_size= test_epoch(test_dictionary, test_interactions, subset, tester, config, last_epoch=True)
-            AUC_dev, PRC_dev, accuracy, sensitivity, specificity, precision, f1, mcc = calculate_metrics(T,Y,S)
-            
-            end = timeit.default_timer()
-            time = end - start
-            log_and_save_metrics(epoch, time, total_loss_train, total_train_size, total_loss_test, total_test_size, AUC_dev, PRC_dev, accuracy, sensitivity, specificity, precision, f1, mcc, max_AUC_dev)
-            plot(config['directories']['metrics_output'])
+        end = timeit.default_timer()
+        time = end - start
+        AUC_dev, PRC_dev, accuracy, sensitivity, specificity, precision, f1, mcc = calculate_metrics(T,Y,S)
+        
+        if AUC_dev > max_AUC_dev:
             save_model(model, "output/model")
-
+            max_AUC_dev = AUC_dev
+        
+        log_and_save_metrics(epoch, time, total_loss_train, total_train_size, total_loss_test, total_test_size, AUC_dev, PRC_dev, accuracy, sensitivity, specificity, precision, f1, mcc, max_AUC_dev)
+        scheduler.step()
+        plot(config['directories']['metrics_output'])
 
 def evaluate(config, tester):
     test_dictionary = load_dictionary(config['directories']['test_dictionary'])
@@ -180,7 +151,6 @@ def evaluate(config, tester):
         true_positives = sum((T_filtered == 1) & (Y_filtered == 1))
         precision_filtered = precision_score(T_filtered, Y_filtered, zero_division=0)
         print(f"Uncertainty Cutoff {cutoff}: Precision - {precision_filtered}, True Positives - {true_positives}")
-
 
 # ------------------- Data Loading -------------------
 
@@ -222,10 +192,9 @@ def calculate_metrics(T, Y, S):
     tn, fp, fn, tp = confusion_matrix(T, Y).ravel()
     sensitivity = tp / (tp + fn)
     specificity = tn / (tn + fp)
-    precision = precision_score(T, Y)
-    f1 = f1_score(T, Y)
-    mcc = matthews_corrcoef(T,Y)
-    
+    precision = tp / (tp + fp)
+    f1 = 2 * (precision * sensitivity) / (precision + sensitivity)
+    mcc = (tp * tn - fp * fn) / ((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)) ** 0.5
     return AUC_dev, PRC_dev, accuracy, sensitivity, specificity, precision, f1, mcc
 
 # Log and save metrics
@@ -304,7 +273,6 @@ def plot(directory, train=True):
     plt.tight_layout()
     plt.savefig(current_dir[:2] + '.png', dpi=300)
     plt.close()
-
 
 # ------------------- Data Manipulation -------------------
 # Prepare data for training/testing (packing, pooling, etc.)

@@ -1,6 +1,6 @@
-from src.models.esmgp.model import (ProteinInteractionNet, Trainer, Tester)
+from model import (ProteinInteractionNet, Trainer, Tester)
 from uncertaintyAwareDeepLearn import VanillaRFFLayer
-from src.models.esmgp.utils import (
+from utils import (
     load_configuration,
     initialize_logging,
     set_random_seed,

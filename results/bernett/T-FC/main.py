@@ -1,6 +1,6 @@
-from src.models.tfc.model import (IntraEncoder, InterEncoder, ProteinInteractionNet, Trainer, Tester)
+from model import (IntraEncoder, InterEncoder, ProteinInteractionNet, Trainer, Tester)
 from uncertaintyAwareDeepLearn import VanillaRFFLayer
-from src.models.tfc.utils  import (
+from utils  import (
     load_configuration,
     initialize_logging,
     set_random_seed,

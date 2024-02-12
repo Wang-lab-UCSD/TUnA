@@ -1,5 +1,5 @@
-from src.data_processing.data_utils import *
-from src.data_processing.embed import *
+from data_processing.data_utils import *
+from data_processing.embed import *
 import os   
 # This script will process the raw data and embed using ESM-2.  
 

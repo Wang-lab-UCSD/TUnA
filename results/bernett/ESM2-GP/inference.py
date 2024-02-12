@@ -30,8 +30,7 @@ def main():
     # Initialize the testing modules
     tester = Tester(model)
 
-    # --- Training and Validation ---
-    # Perform training and validation
+    # --- Evaluate trained model ---
     evaluate(config, tester)
 
 # Execute the main function when the script is run

@@ -1,5 +1,5 @@
-from src.models.esmmlp.model import (Net, Trainer, Tester)
-from src.models.esmmlp.utils import (
+from model import (Net, Trainer, Tester)
+from utils import (
     load_configuration,
     initialize_logging,
     set_random_seed,

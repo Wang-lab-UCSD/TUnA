@@ -1,6 +1,6 @@
 from model import (IntraEncoder, InterEncoder, ProteinInteractionNet, Trainer, Tester)
 from uncertaintyAwareDeepLearn import VanillaRFFLayer
-from src.models.tuna.utils import (
+from utils import (
     load_configuration,
     initialize_logging,
     set_random_seed,
