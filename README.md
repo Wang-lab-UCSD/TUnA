@@ -2,7 +2,7 @@
 
 
 ## Introduction
-This repository contains the data, code, and pretrained-models required to reproduce/use TUnA for PPI prediction.
+This repository contains the data and code required to reproduce results or run TUnA.
 
 ## Installation
 ```console
@@ -14,7 +14,7 @@ $ conda activate tuna
 NOTE: The torch packages in environment.yml may need to be edited depending on which CUDA you are using: https://pytorch.org/get-started/previous-versions/ 
 
 ## Usage
-### Data processing]
+### Data processing
 The embedding step may take some time.
 #### Cross-species Dataset
 ```console
@@ -38,7 +38,7 @@ Hyperparameters and other options can be controlled using the config.yaml file. 
 First, download the pretrained models you wish from: [https://huggingface.co/datasets/yk0/TUnA_data/tree/main](https://huggingface.co/datasets/yk0/TUnA_models).
 Then, place the model file in the results/dataset/model/output directory. For example: place the bernett-TUnA model in the results/bernett/TUnA/output
 
-Then to evaluate either the re-trained or pre-trained models:
+Then to evaluate either the re-trained or pre-trained models on the test sets:
 ```console
 $ cd results/bernett/TUnA # navigate to the model you wish to use. The pretrained model needs to be placed in output/
 $ python3 inference.py 
