@@ -1,6 +1,10 @@
 import torch
 import random
+<<<<<<< HEAD:results/bernett/ESM2-MLP/utils.py
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, auc, precision_recall_curve, precision_score
+=======
+from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, auc, precision_recall_curve, f1_score, precision_score, matthews_corrcoef
+>>>>>>> b0eb81b6d36dc7cec6080df398e760b0420367ca:src/models/esmmlp/utils.py
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, Dataset
 import calibration as cal

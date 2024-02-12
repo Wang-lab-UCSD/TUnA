@@ -1,8 +1,14 @@
 import torch
 import random
+<<<<<<< HEAD:results/bernett/T-FC/utils.py
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, auc, precision_recall_curve, precision_score
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, Dataset
+=======
+from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, auc, precision_recall_curve, f1_score, precision_score, matthews_corrcoef
+from torch.utils.data import DataLoader, Dataset
+import matplotlib.pyplot as plt
+>>>>>>> b0eb81b6d36dc7cec6080df398e760b0420367ca:src/models/tfc/utils.py
 import calibration as cal
 import logging
 import yaml

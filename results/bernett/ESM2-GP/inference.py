@@ -1,6 +1,6 @@
 from model import (ProteinInteractionNet, Tester)
 from uncertaintyAwareDeepLearn import VanillaRFFLayer
-from utils import (
+from src.models.esmgp.utils import (
     load_configuration,
     set_random_seed,
     get_computation_device,
