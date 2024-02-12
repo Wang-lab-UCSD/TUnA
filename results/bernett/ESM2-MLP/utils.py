@@ -123,7 +123,7 @@ def evaluate(config, tester):
     if subset < 0:
         subset = None
 
-    T, Y, S, total_loss_test, total_test_size = test_epoch(test_dictionary, test_interactions, subset, tester, config, last_epoch=True)
+    T, Y, S, total_loss_test, total_test_size = test_epoch(test_dictionary, test_interactions, subset, tester, config)
     AUC_dev, PRC_dev, accuracy, sensitivity, specificity, precision, f1, mcc = calculate_metrics(T, Y, S)
     print(total_loss_test / total_test_size, AUC_dev, PRC_dev, accuracy, sensitivity, specificity, precision, f1, mcc)
 

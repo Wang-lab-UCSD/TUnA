@@ -26,7 +26,7 @@ def main():
     inter_encoder = InterEncoder(config['model']['protein_embedding_dim'], config['model']['hid_dim'], config['model']['n_layers'], 
                       config['model']['n_heads'], config['model']['ff_dim'], config['model']['dropout'], config['model']['activation_function'], device)
     model = ProteinInteractionNet(intra_encoder, inter_encoder, device)
-    model.load_state_dict(torch.load(config['directories']['model_output']))
+    model.load_state_dict(torch.load(config['directories']['model_output'], map_location=device))
     model.eval()
     model.to(device)
 

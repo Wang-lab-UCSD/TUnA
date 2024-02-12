@@ -17,12 +17,12 @@ optimizer:
   gamma: 0.93
 
 directories:
-  train_dictionary: "/new-stg/home/young/ppi-data/gold_standard_embedded/Intra1_dictionary_1500_or_less/protein_dictionary.pt" # directory the embedded protein .pt files are located
-  train_interactions: "/new-stg/home/young/ppi-data/gold_standard_processed/Intra1_interaction_1500_or_less.tsv"
-  validation_dictionary: "/new-stg/home/young/ppi-data/gold_standard_embedded/Intra0_dictionary_1500_or_less/protein_dictionary.pt"
-  validation_interactions: "/new-stg/home/young/ppi-data/gold_standard_processed/Intra0_interaction_1500_or_less.tsv"
-  test_dictionary: "/new-stg/home/young/ppi-data/gold_standard_embedded/Intra2_dictionary/protein_dictionary.pt"
-  test_interactions: "/new-stg/home/young/ppi-data/gold_standard_processed/Intra2_interaction.tsv"
+  train_dictionary: "../../../data/embedded/bernett/Intra1_dictionary_1500_or_less/protein_dictionary.pt" # directory the embedded protein .pt files are located
+  train_interactions: "../../../data/processed/bernett/Intra1_interaction_1500_or_less.tsv"
+  validation_dictionary: "../../../data/embedded/bernett/Intra0_dictionary_1500_or_less/protein_dictionary.pt"
+  validation_interactions: "../../../data/processed/bernett/Intra0_interaction_1500_or_less.tsv"
+  test_dictionary: "../../../data/embedded/bernett/Intra2_dictionary/protein_dictionary.pt"
+  test_interactions: "../../../data/processed/bernett/Intra2_interaction.tsv"
   metrics_output: "output/results.txt"
   model_output: "output/model" # Where the best model will be saved.
 
