@@ -1,6 +1,6 @@
 import torch
 from model import (Net, Tester)
-from src.models.esmmlp.utils import (
+from utils import (
     load_configuration,
     set_random_seed,
     get_computation_device,
