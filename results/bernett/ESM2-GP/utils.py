@@ -3,10 +3,6 @@ import random
 from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, auc, precision_recall_curve, precision_score
 import matplotlib.pyplot as plt
 from torch.utils.data import DataLoader, Dataset
-import matplotlib.pyplot as plt
-from sklearn.metrics import accuracy_score, roc_auc_score, confusion_matrix, auc, precision_recall_curve, f1_score, precision_score, matthews_corrcoef
-from torch.utils.data import DataLoader, Dataset
-import matplotlib.pyplot as plt
 import calibration as cal
 import logging
 import yaml
@@ -15,7 +11,6 @@ import pandas as pd
 import numpy as np
 import csv
 import timeit
-
 # ------------------- Initialization and Configuration -------------------
 # Set up logging to a specific file
 def initialize_logging(log_file):

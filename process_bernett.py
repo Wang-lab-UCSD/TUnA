@@ -15,8 +15,9 @@ def make_bernett_interactions(dataset, target_dir, fasta):
     create_unique_proteins_with_sequences_file(output_interaction_path, fasta, output_dictionary_path)
     separate_files_based_on_sequence_length(dataset, MAX_LENGTH, target_dir)
 
-MAX_LENGTH = 1500
-DATASETS = ['Intra0', 'Intra1', 'Intra2']
+MAX_LENGTH = 512
+#DATASETS = ['Intra0', 'Intra1', 'Intra2']
+DATASETS = ['Intra1']
 DIR = "data/raw/bernett/"
 FASTA_FILE = "data/raw/bernett/human_swissprot_oneliner.fasta"
 TARGET_DIR = "data/processed/bernett/"
