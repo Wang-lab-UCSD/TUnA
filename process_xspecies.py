@@ -25,17 +25,14 @@ os.makedirs(os.path.dirname(TARGET_DIR), exist_ok=True)
 for species in DATASETS:
     make_xspecies_interactions(species, DIR, TARGET_DIR, FASTA_FILE)
 
-
-
-
 """Second, embed the processed x-species data with ESM-2"""
-#device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
-#model, alphabet = load_model_and_alphabet(device)
-#datasets = ['human_train_dictionary','human_test_dictionary','mouse_test_dictionary','fly_test_dictionary','worm_test_dictionary','yeast_test_dictionary','ecoli_test_dictionary']
-#for dataset in datasets:
-#    data_file = os.path.join(TARGET_DIR, f"{dataset}.tsv")
-#    with open(data_file, "r") as f:
-#        data_list = f.read().strip().split('\n')
-#    dir_input = os.path.join('data/embedded/xspecies/', dataset)
-#    os.makedirs(dir_input, exist_ok=True)
-#    process_data_points(model, alphabet, data_list, dir_input, device=device)
+device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
+model, alphabet = load_model_and_alphabet(device)
+datasets = ['human_train_dictionary','human_test_dictionary','mouse_test_dictionary','fly_test_dictionary','worm_test_dictionary','yeast_test_dictionary','ecoli_test_dictionary']
+for dataset in datasets:
+    data_file = os.path.join(TARGET_DIR, f"{dataset}.tsv")
+    with open(data_file, "r") as f:
+        data_list = f.read().strip().split('\n')
+    dir_input = os.path.join('data/embedded/xspecies/', dataset)
+    os.makedirs(dir_input, exist_ok=True)
+    process_data_points(model, alphabet, data_list, dir_input, device=device)

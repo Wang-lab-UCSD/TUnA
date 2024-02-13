@@ -41,7 +41,6 @@ def shuffle_and_clean(input_file, output_file, seed=47):
     random.shuffle(data)
     write_interaction_data(output_file, data)
 
-
 def write_protein_sequences(file_path, proteins, sequences):
     with open(file_path, 'w', newline='') as file:
         for protein in proteins:
