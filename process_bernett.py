@@ -27,6 +27,7 @@ for intra in DATASETS:
     make_bernett_interactions(intra, TARGET_DIR, FASTA_FILE)
 
 """Second, embed the processed Bernett data with ESM-2"""
+"""Please change the cuda device to the device that you are using"""
 device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
 model, alphabet = load_model_and_alphabet(device)
 datasets = ['Intra0_dictionary_1500_or_less','Intra1_dictionary_1500_or_less','Intra2_dictionary_1500_or_less']

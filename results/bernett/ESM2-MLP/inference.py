@@ -22,7 +22,7 @@ def main():
     # --- Model Initialization ---
     # Initialize the Encoder, Decoder, and overall model
     model = Net(config['model']['protein_embedding_dim'], config['model']['hid_dim'],config['model']['dropout'], device)
-    model.load_state_dict(torch.load(config['directories']['model_output']))
+    model.load_state_dict(torch.load(config['directories']['model_output'], map_location=device))
     model.eval()
     model.to(device)
 

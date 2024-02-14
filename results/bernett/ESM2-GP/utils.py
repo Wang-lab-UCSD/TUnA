@@ -204,10 +204,9 @@ def calculate_metrics(T, Y, S):
     tn, fp, fn, tp = confusion_matrix(T, Y).ravel()
     sensitivity = tp / (tp + fn)
     specificity = tn / (tn + fp)
-    precision = precision_score(T, Y)
-    f1 = f1_score(T, Y)
-    mcc = matthews_corrcoef(T,Y)
-    
+    precision = tp / (tp + fp)
+    f1 = 2 * (precision * sensitivity) / (precision + sensitivity)
+    mcc = (tp * tn - fp * fn) / ((tp + fp) * (tp + fn) * (tn + fp) * (tn + fn)) ** 0.5
     return AUC_dev, PRC_dev, accuracy, sensitivity, specificity, precision, f1, mcc
 
 # Log and save metrics
