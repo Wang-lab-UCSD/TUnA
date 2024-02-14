@@ -35,6 +35,8 @@ $ python3 main.py
 ```
 Hyperparameters and other options can be controlled using the config.yaml file. Please make sure the directories to the train/val/test dictionary and interaction files are correct. Every epoch, the performance on the validation set will be logged in output/results.txt
 
+NOTE: You need to specify your cuda device in config.yaml. Please edit the config file so that you are using the cuda device available in your setup.
+
 #### Using pre-trained models:
 First, download the pretrained models you wish from: [https://huggingface.co/datasets/yk0/TUnA_data/tree/main](https://huggingface.co/datasets/yk0/TUnA_models).
 Then, place the model file in the results/dataset/model/output directory. For example: place the bernett-TUnA model in the results/bernett/TUnA/output
