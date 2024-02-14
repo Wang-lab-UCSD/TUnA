@@ -36,4 +36,4 @@ directories:
 # Other Parameters 
 other:
   random_seed: 47  # Chirp chirp!
-  cuda_device: 'cuda:3'
+  cuda_device: 'cuda:3' # Change if necessary, select the cuda device available on your setup.
