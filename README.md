@@ -1,5 +1,5 @@
 # TUnA: Transformer-based Uncertainty Aware model for PPI Prediction
-![image3](https://github.com/young-su-ko/TUnA/assets/130201330/7b75685e-71e9-4da0-b20f-2a146d7b0588)
+![architecture](architecture.png)
 
 
 ## Introduction
