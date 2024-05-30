@@ -1,0 +1,8 @@
+Test Loss           AUC                 PRC                 Accuracy            Sensitivity         Specificity         Precision           F1                  MCC
+0.630069833844923 0.6998462348926371 0.6783249558507279 0.6474408238549032 0.6447509990777743 0.650130648632032 0.6482382939267501 0.6464899437466286 0.29488591483265725
+Expected Calibration Error (ECE): 0.015759823155723076
+Uncertainty Cutoff 0.2: Precision - 0.0, True Positives - 0
+Uncertainty Cutoff 0.4: Precision - 0.8285714285714286, True Positives - 29
+Uncertainty Cutoff 0.6: Precision - 0.8057097541633624, True Positives - 1016
+Uncertainty Cutoff 0.8: Precision - 0.7665964172813488, True Positives - 4365
+Job finished in 886 seconds
