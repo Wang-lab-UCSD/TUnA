@@ -1,9 +1,11 @@
 # TUnA: Transformer-based Uncertainty Aware model for PPI Prediction
 ![architecture](model_architecture.png)
 
+# Notice (Dec. 2025)
+Check out the streamlined version of this codebase, [TUnA-R](https://github.com/young-su-ko/TUnA-R). The new repo is heavily refactored and the core logic of our model should be easier to understand.
 
 ## Introduction
-This repository contains the data and code required to reproduce results or run TUnA.
+This repository contains the data and code required to reproduce results or run TUnA. Note, see [TUnA-R](https://github.com/young-su-ko/TUnA-R) for a more streamlined version of the codebase! Stay here if you want the exact code used in the manuscript.
 
 ## Installation
 ```console
